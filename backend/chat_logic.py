@@ -9,7 +9,7 @@ client = OpenAI()
 client.api_key = os.getenv("OPENAI_API_KEY")
 
 QUESTIONS = [
-    "Was bewegt dich momentan, tiefer ins Yoga einzutauchen?",
+    "Was bewegt dich dazu, tiefer ins Yoga einsteigen zu wollen?",
     "Welche dieser Aspekte faszinieren dich am meisten am Yoga?",
     "Wie lange praktizierst du bereits Yoga?",
     "Wie viel Zeit kannst du pro Woche realistisch investieren, ohne dass es stressig wird?",

@@ -36,7 +36,7 @@ const createChatLi = (message, className) => {
   let chatContent =
     className === "outgoing"
       ? `<p></p>`
-      : `<span class="material-symbols-outlined" translate="no">smart_toy</span><p></p>`;
+      : `<img src="/static/Icon_Chatbot.png" alt="Bot" class="chatbot-icon" /><p></p>`;
   chatLi.innerHTML = chatContent;
   chatLi.querySelector("p").textContent = message;
   return chatLi; // return chat <li> element
@@ -69,7 +69,9 @@ const generateResponse = async (chatElement) => {
     messageElement.textContent = cleanedReply.trim();
   } catch (error) {
     messageElement.classList.add("error");
-    messageElement.textContent = "Fehler: " + error.message;
+    // messageElement.textContent = "Fehler: " + error.message;
+    messageElement.textContent =
+      "Der Server reagiert im Moment nicht. Bitte versuchen Sie es später noch einmal.";
   } finally {
     chatbox.scrollTo(0, chatbox.scrollHeight);
     setInputState(true); // Re-enable input after response
