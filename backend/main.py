@@ -1,36 +1,42 @@
+import os
+import time
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import os
-from pydantic import BaseModel
-from backend.chat_logic import *
-import uuid
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from datetime import datetime, timedelta
+from threading import Thread
+import uuid
+
+from backend.drive_sync import download_pdfs_from_drive
+from backend.assistant_setup import *
+from backend.chat_logic import *
 
 load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
 app = FastAPI()
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://localhost:3000"] or your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-ASSISTANT_ID = os.getenv("YOGA_ASSISTANT_ID")  # Set this after running assistant_setup.py
-
 class ChatInput(BaseModel):
     session_id: str | None = None
     message: str
 
+assistant_id = None
+vector_store_id = None
 SESSION_TIMEOUT = timedelta(minutes=30)
 
 @app.get("/", response_class=HTMLResponse)
@@ -39,6 +45,7 @@ async def serve_home(request: Request):
 
 @app.post("/chat")
 def chat_route(input: ChatInput):
+    global assistant_id
     session_id = input.session_id or str(uuid.uuid4())
     message = input.message
 
@@ -48,7 +55,7 @@ def chat_route(input: ChatInput):
         del user_sessions[sid]
 
     if session_id not in user_sessions:
-        thread_id = init_thread(ASSISTANT_ID)
+        thread_id = init_thread(assistant_id)
         user_sessions[session_id] = {"step": 0, "answers": [], "thread_id": thread_id}
 
     session = user_sessions[session_id]
@@ -67,9 +74,39 @@ def chat_route(input: ChatInput):
             return {"reply": q, "session_id": session_id}
         else:
             send_user_message(session["thread_id"], "Bitte empfehle einen passenden Kurs.")
-            answer = run_assistant(session["thread_id"], ASSISTANT_ID)
+            answer = run_assistant(session["thread_id"], assistant_id)
             return {"reply": answer, "session_id": session_id, "done": True}
     else:
         send_user_message(session["thread_id"], message)
-        answer = run_assistant(session["thread_id"], ASSISTANT_ID)
+        answer = run_assistant(session["thread_id"], assistant_id)
         return {"reply": answer, "session_id": session_id}
+
+def clean_download_folder():
+    folder = "downloads"
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    print("Downloads folder cleaned.")
+
+def update_assistant():
+    global assistant_id, vector_store_id
+    clean_download_folder()
+
+    delete_assistant_and_vector_store(assistant_id, vector_store_id)
+
+    paths = download_pdfs_from_drive(DRIVE_FOLDER_ID)
+    file_ids = upload_files(paths)
+    vector_store_id = create_vector_store(file_ids)
+    assistant_id = create_assistant(file_ids, vector_store_id)
+    print("Assistant created:", assistant_id)
+
+    # assistant_id = os.getenv("YOGA_ASSISTANT_ID")
+
+def schedule_updates():
+    while True:
+        update_assistant()
+        time.sleep(86400)  # 24 hours
+
+# Initial assistant creation
+Thread(target=schedule_updates, daemon=True).start()
