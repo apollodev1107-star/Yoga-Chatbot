@@ -143,9 +143,35 @@ sendChatBtn.addEventListener("click", handleChat);
 closeBtn.addEventListener("click", () =>
   document.body.classList.remove("show-chatbot")
 );
-chatbotToggler.addEventListener("click", () =>
-  document.body.classList.toggle("show-chatbot")
-);
+chatbotToggler.addEventListener("click", async () => {
+  document.body.classList.toggle("show-chatbot");
+
+  if (!sessionId) {
+    const botLi = createChatLi("Laden...", "incoming");
+    chatbox.appendChild(botLi);
+    chatbox.scrollTo(0, chatbox.scrollHeight);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: null, message: "" }),
+      });
+
+      const data = await response.json();
+      sessionId = data.session_id;
+
+      const cleanedReply = (data.reply || "Keine Antwort erhalten.")
+        .replace(/【\d+:\d+†[^】]*】/gu, "")
+        .replace(/\s*\n\s*/g, "\n")
+        .trim();
+
+      botLi.querySelector("p").innerHTML = cleanedReply;
+    } catch (error) {
+      botLi.querySelector("p").textContent = "konnte nicht geladen werden.";
+    }
+  }
+});
 micBtn.addEventListener("click", () => {
   recognition.start();
 });

@@ -27,8 +27,8 @@ def create_assistant(file_ids, vector_store_id):
         instructions = """
         Du bist Yogalehrer:in und unterstützt Kund:innen dabei, die passende Yoga-Ausbildung zu finden.
 
-        Dir werden 7 Fragen und die jeweiligen Antworten der Kund:innen bereitgestellt.
-        Analysiere diese Antworten, um die passende Yoga-Ausbildung zu identifizieren.
+        If dir werden mehrere Fragen und die jeweiligen Antworten der Kund:innen bereitgestellt,
+        analysiere diese Antworten, um die passende Yoga-Ausbildung zu identifizieren.
         Nutze file_search, um relevante Informationen aus den Ausbildungsunterlagen zu finden.
 
         Wenn du Informationen aus den Ausbildungsunterlagen verwendest, gib keine Quellverweise wie „ “ oder ähnliche an. Formuliere die Antwort natürlich und ohne solche Markierungen.

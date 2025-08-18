@@ -39,6 +39,9 @@ assistant_id = None
 vector_store_id = None
 SESSION_TIMEOUT = timedelta(minutes=30)
 
+QUESTIONS = []
+user_sessions = {}
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -54,22 +57,30 @@ def chat_route(input: ChatInput):
     for sid in expired:
         del user_sessions[sid]
 
-    if session_id not in user_sessions:
+    if input.session_id is None:
         thread_id = init_thread(assistant_id)
         user_sessions[session_id] = {"step": 0, "answers": [], "thread_id": thread_id}
+        q = QUESTIONS[0]
+        intro = (
+            "Hallo 👋<br /><br />"
+            "Lass uns gemeinsam das Angebot entdecken, das deine nächste Entwicklungsstufe im Yoga und darüber hinaus freisetzt. "
+            "Bitte beantworte dazu einige Fragen:<br /><br />" + q
+        )
+        return {"reply": intro, "session_id": session_id}
 
     session = user_sessions[session_id]
     session["last_active"] = datetime.utcnow()
 
     if session["step"] < len(QUESTIONS):
-        valid, suggestion = validate_answer(session["step"], message)
+        # valid, suggestion = validate_answer(session["step"], message)
+        valid, suggestion = validate_answer_with_assistant(session["thread_id"], session["step"], message, assistant_id, QUESTIONS)
         if not valid:
             return {"reply": suggestion, "session_id": session_id}
         
         send_user_message(session["thread_id"], message)
         session["answers"].append(message)
         session["step"] += 1
-        q = next_question(session["step"])
+        q = next_question(session["step"], QUESTIONS)
         if q:
             return {"reply": q, "session_id": session_id}
         else:
@@ -89,19 +100,35 @@ def clean_download_folder():
             os.remove(file_path)
     print("Downloads folder cleaned.")
 
+def get_existing_download_paths():
+    folder = "downloads"
+    if not os.path.exists(folder):
+        return []  # or raise an error if you prefer
+
+    return [
+        os.path.join(folder, f)
+        for f in os.listdir(folder)
+        if os.path.isfile(os.path.join(folder, f)) and f.lower().endswith(".pdf")
+    ]
+
 def update_assistant():
-    global assistant_id, vector_store_id
+    global assistant_id, vector_store_id, QUESTIONS
     clean_download_folder()
 
     delete_assistant_and_vector_store(assistant_id, vector_store_id)
 
     paths = download_pdfs_from_drive(DRIVE_FOLDER_ID)
+    paths = get_existing_download_paths()
+
     file_ids = upload_files(paths)
     vector_store_id = create_vector_store(file_ids)
     assistant_id = create_assistant(file_ids, vector_store_id)
     print("Assistant created:", assistant_id)
 
     # assistant_id = os.getenv("YOGA_ASSISTANT_ID")
+    # assistant_id = "asst_ClDGGV6xi50KVjtVa0YuYFek"
+    QUESTIONS = []
+    QUESTIONS = load_questions_from_pdf()
 
 def schedule_updates():
     while True:
