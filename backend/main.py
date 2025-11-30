@@ -126,7 +126,6 @@ def update_assistant():
     print("Assistant created:", assistant_id)
 
     # assistant_id = os.getenv("YOGA_ASSISTANT_ID")
-    # assistant_id = "asst_ClDGGV6xi50KVjtVa0YuYFek"
     QUESTIONS = []
     QUESTIONS = load_questions_from_pdf()
 
