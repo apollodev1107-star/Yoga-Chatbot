@@ -1,8 +1,8 @@
-# Yoga Chatbot 🤖🧘
+# Yoga Chatbot
 
 An intelligent AI-powered chatbot designed to help users find the perfect yoga training program. The chatbot uses OpenAI's GPT models with file search capabilities to provide personalized recommendations based on user responses to a series of questions.
 
-## 🌟 Features
+## Features
 
 - **Interactive Q&A Flow**: Guides users through a series of questions to understand their yoga goals and preferences
 - **AI-Powered Recommendations**: Uses OpenAI Assistant API with file search to recommend suitable yoga courses
@@ -12,7 +12,7 @@ An intelligent AI-powered chatbot designed to help users find the perfect yoga t
 - **Answer Validation**: Validates user answers against example responses before proceeding
 - **Real-time Chat Interface**: Modern, responsive chat UI with smooth animations
 
-## 🏗️ Architecture
+## Architecture
 
 The application consists of:
 
@@ -22,14 +22,14 @@ The application consists of:
 - **Storage**: Google Drive integration for course materials
 - **Session Management**: In-memory session storage with timeout
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.8+
 - OpenAI API key
 - Google Cloud Service Account credentials (for Drive access)
 - Google Drive folder ID containing course PDFs
 
-## 🚀 Installation
+## Installation
 
 1. **Clone the repository**
    ```bash
@@ -78,7 +78,7 @@ The application consists of:
    - Ensure `Questions.pdf` and `Example Answers.pdf` are in the folder
    - The system will automatically download and process these files
 
-## 🎯 Usage
+## Usage
 
 1. **Start the server**
    ```bash
@@ -98,7 +98,7 @@ The application consists of:
    - The chatbot will validate your answers and provide recommendations
    - Use the microphone button for voice input (German)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 yoga_chatbot/
@@ -121,7 +121,7 @@ yoga_chatbot/
 └── README.md
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -140,14 +140,14 @@ The assistant is configured with:
 - **Session Timeout**: 30 minutes of inactivity
 - **Session Storage**: In-memory (resets on server restart)
 
-## 🔒 Security Notes
+## Security Notes
 
 - **Never commit** `credentials.json` or `.env` files
 - The `.gitignore` file is configured to exclude sensitive files
 - Regenerate credentials if they were accidentally committed
 - Use environment variables for all API keys
 
-## 🛠️ API Endpoints
+## API Endpoints
 
 ### `GET /`
 Returns the main HTML page with the chatbot interface.
@@ -172,7 +172,7 @@ Handles chat interactions.
 }
 ```
 
-## 📝 How It Works
+## How It Works
 
 1. **Initialization**: On startup, the system downloads PDFs from Google Drive and creates an OpenAI Assistant with file search capabilities.
 
@@ -184,14 +184,14 @@ Handles chat interactions.
 
 5. **Follow-up**: Users can ask follow-up questions, which are answered using either the course materials or general knowledge.
 
-## 🔄 Auto-Update System
+## Auto-Update System
 
 The system automatically:
 - Downloads latest PDFs from Google Drive every 24 hours
 - Recreates the vector store with updated documents
 - Updates the Assistant with new course information
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -212,7 +212,7 @@ The system automatically:
    - Sessions are stored in memory and reset on server restart
    - For production, consider using Redis or a database
 
-## 🚧 Future Improvements
+## Future Improvements
 
 - [ ] Persistent session storage (database/Redis)
 - [ ] Multi-language support
@@ -222,15 +222,15 @@ The system automatically:
 - [ ] Email notifications for recommendations
 - [ ] Integration with booking systems
 
-## 📄 License
+## License
 
 This project is private and proprietary.
 
-## 👥 Contributing
+## Contributing
 
 This is a private project. For contributions or questions, please contact the repository owner.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - OpenAI for the Assistant API
 - FastAPI for the web framework
@@ -239,4 +239,3 @@ This is a private project. For contributions or questions, please contact the re
 ---
 
 **Note**: This chatbot is specifically designed for yoga course recommendations and uses German language for interactions. Modify the language settings in `static/script.js` and `backend/main.py` for other languages.
-
